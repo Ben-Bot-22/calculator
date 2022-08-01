@@ -1,4 +1,4 @@
-
+let displayValue = '';
 
 function add(a, b) {
     return a + b;
@@ -26,4 +26,10 @@ function operate(operator, a, b) {
         case '/': return divide(a, b);
     }
 }
+
+/*
+TODO:
+- https://colorhunt.co/palette/fdebf7fbcaffffadf0fc28fb
+
+*/
 
