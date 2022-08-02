@@ -28,7 +28,7 @@ body {
     background-color: var(--background-pink);
     padding: 5px;
     border-radius: 5px;
-    grid-gap: 5px;
+    grid-gap: 4px;
     border: 1px solid var(--dark-pink);
     width: 150px;
     height: 250px;
@@ -40,10 +40,32 @@ body {
     border: 1px solid var(--dark-pink);
     grid-column: span 4;
     grid-row: span 2;
+    display: flex;
+    flex-direction: column;
+    /* justify-content: ; */
+    /* align-items: flex-end; */
     /* padding: 5px; */
+    /* border: 1px solid red; */
 }
 
-.operator-btn {
+.top-display {
+    /* border: 1px solid red; */
+    color: var(--background-pink);
+    font-size: small;
+    margin-top: 0; 
+    padding: 2px;
+    /* align-self: flex-end; */
+}
+
+.bottom-display {
+    /* border: 1px solid red; */
+    font-size: x-large;
+    padding: 2px;
+    color: var(--dark-pink);
+    /* align-self: flex-end; */
+}
+
+.dark-btn {
     background-color: var(--operator-color);
 }
 
