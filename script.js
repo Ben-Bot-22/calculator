@@ -1,46 +1,105 @@
 let bottomDisplay = ''; //stores number buttons as pressed
+let firstNumber = '';
+let operation = '';
 let topDisplay = ''; //stores equation
+let solution = null;
+let isLastButtonOperator = false;
 
-const buttonContainer = document.querySelector(".container");
+// const buttonContainer = document.querySelector(".container"); //get numbers on display
 const displayTop = document.querySelector(".top-display");
 const displayBottom = document.querySelector(".bottom-display");
-buttonContainer.addEventListener('click', showOnDisplay);
+const clearButton = document.querySelector(".clear-btn");
+const deleteButton = document.querySelector(".delete-btn");
+const equal = document.querySelector(".equal");
+const numberButtons = document.querySelectorAll(".num-btn"); //get numbers on display
+const operators = document.querySelectorAll(".operator");
+
+clearButton.addEventListener('click', clearDisplay);
+deleteButton.addEventListener('click', backSpace);
+equal.addEventListener('click', equalButton);
+for (let i = 0; i < operators.length; i++) {
+    // console.log(operators[i]);
+    operators[i].addEventListener('click', operateButton);
+}
+for (let i = 0; i < numberButtons.length; i++) {
+    // console.log(numberButtons[i]);
+    numberButtons[i].addEventListener('click', showOnDisplay);
+}
 
 function showOnDisplay(e) {
-    // console.log(e.target.nodeName);
-    const isButton = e.target.nodeName === "BUTTON";
-    if (!isButton) return;
-    bottomDisplay += e.target.innerHTML.toString();
+    console.log("showOnDisplay " + e);
+    // const isButton = e.target.nodeName === "BUTTON";
+    // if (!isButton) return;
+    if (isLastButtonOperator)
+    {
+        isLastButtonOperator = false;
+        bottomDisplay = e.target.innerHTML.toString();
+    }
+    else
+    {
+        bottomDisplay += e.target.innerHTML.toString();
+    }
     displayBottom.innerHTML = bottomDisplay;
+}
+
+function clearDisplay(e) {
+    updateBottomDisplay('');
+    updateTopDisplay('');
+    firstNumber = '';
+    operation = '';
+}
+
+function backSpace(e) {
+    updateBottomDisplay(bottomDisplay.slice(0, bottomDisplay.length - 1));
+}
+
+//Solve equation
+function equalButton(e) {
+    solution = operate(operation, firstNumber, bottomDisplay);
+    updateTopDisplay(`${firstNumber} ${operation} ${bottomDisplay} = `);
+    updateBottomDisplay(solution);
+    operation = '';
+}
+
+function updateTopDisplay(num) {
+    topDisplay = num; //`${firstNumber} ${operation}`;
+    displayTop.innerHTML = topDisplay;
+}
+
+function updateBottomDisplay(newText) {
+    bottomDisplay = newText;
+    displayBottom.innerHTML = bottomDisplay;
+}
+
+function operateButton(e) {
+    // if operation is not null, evaluate
+    if (operation !== '')
+    {
+        equalButton(e);
+        firstNumber = bottomDisplay;
+        operation = e.target.innerHTML.toString();
+    }
+    else
+    {
+        firstNumber = bottomDisplay;
+        operation = e.target.innerHTML.toString();
+        updateTopDisplay(`${firstNumber} ${operation}`);
+    }
+    isLastButtonOperator = true;
 }
 
 /*
 TODO:
-
-1) store the first number that is input into the calculator when a user presses an operator 
-2) also save which operation has been chosen
-3) operate() on them when the user presses the “=” key.
-4) once operate() has been called, update the display with the ‘solution’ to the operation.
-5) implement clear button
-6) implement back button
- 
-
-Users should be able to string together several operations and get the right answer, 
-with each pair of numbers being evaluated at a time. For example, 12 + 7 - 5 * 3 = should yield 42. 
-
-Your calculator should not evaluate more than a single pair of numbers at a time. 
-Example: you press a number button (12), followed by an operator button (+), a second number button (7), 
-and finally a second operator button (-). 
-Your calculator should then do the following: 
-first, evaluate the first pair of numbers (12 + 7), 
-second, display the result of that calculation (19), and 
-finally, use that result (19) as the first number in your new calculation, along with the next operator (-).
-
-You should round answers with long decimals so that they don’t overflow the screen.
-Pressing = before entering all of the numbers or an operator could cause problems!
-Pressing “clear” should wipe out any existing data.. make sure the user is really starting fresh after pressing “clear”
-Display a snarky error message if the user tries to divide by 0… and don’t let it crash your calculator!
-
+- Disable decimal if already one in display
+- Keyboard support
+- Round answers with long decimals so that they don’t overflow the screen.
+- Pressing = before entering all of the numbers or an operator could cause 
+    problems!
+- Pressing “clear” should wipe out any existing data.. 
+    make sure the user is really starting fresh after pressing “clear”
+- Display a snarky error message if the user tries to divide by 0… 
+    and don’t let it crash your calculator!
+- Readme
 */
 
 function add(a, b) {
@@ -65,7 +124,7 @@ function operate(operator, a, b) {
     switch (operator) {
         case '+': return add(a, b);
         case '-': return subtract(a, b);
-        case '*': return multiply(a, b);
+        case 'x': return multiply(a, b);
         case '/': return divide(a, b);
     }
 }
@@ -74,6 +133,5 @@ function operate(operator, a, b) {
 /*
 TODO:
 - https://colorhunt.co/palette/fdebf7fbcaffffadf0fc28fb
-
 */
 

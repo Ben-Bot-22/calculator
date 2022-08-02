@@ -54,6 +54,7 @@ body {
     font-size: small;
     margin-top: 0; 
     padding: 2px;
+    height: 20px;
     /* align-self: flex-end; */
 }
 
@@ -62,6 +63,7 @@ body {
     font-size: x-large;
     padding: 2px;
     color: var(--dark-pink);
+    height: 30px;
     /* align-self: flex-end; */
 }
 
