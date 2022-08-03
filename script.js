@@ -4,6 +4,7 @@ let operation = '';
 let topDisplay = ''; //stores equation
 let solution = null;
 let isLastButtonOperator = false;
+const maxCharacters = 10;
 
 // const buttonContainer = document.querySelector(".container"); //get numbers on display
 const displayTop = document.querySelector(".top-display");
@@ -18,28 +19,83 @@ clearButton.addEventListener('click', clearDisplay);
 deleteButton.addEventListener('click', backSpace);
 equal.addEventListener('click', equalButton);
 for (let i = 0; i < operators.length; i++) {
-    // console.log(operators[i]);
     operators[i].addEventListener('click', operateButton);
 }
 for (let i = 0; i < numberButtons.length; i++) {
-    // console.log(numberButtons[i]);
-    numberButtons[i].addEventListener('click', showOnDisplay);
+    numberButtons[i].addEventListener('click', buttonShowOnDisplay);
+}
+//Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    console.log(e.key.toLowerCase());
+    switch (e.key.toLowerCase())
+    {
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '.':
+            showOnDisplay(e.key.toLowerCase());
+            break;
+        case 'clear':
+            clearDisplay();
+            break;
+        case 'delete':
+            backSpace();
+            break;
+        case '/':
+        case '*':
+        case '-':
+        case '+':
+            calcOperation(e.key.toLowerCase());
+            break;
+        case '=':
+        case 'enter':
+            equalButton();
+            break;
+    }
+});
+
+function buttonShowOnDisplay(e) {
+    showOnDisplay(e.target.innerHTML.toString());
 }
 
-function showOnDisplay(e) {
-    console.log("showOnDisplay " + e);
-    // const isButton = e.target.nodeName === "BUTTON";
-    // if (!isButton) return;
-    if (isLastButtonOperator)
+function showOnDisplay(num) {
+    if (isLastButtonOperator) 
     {
         isLastButtonOperator = false;
-        bottomDisplay = e.target.innerHTML.toString();
+        bottomDisplay = num;
     }
     else
     {
-        bottomDisplay += e.target.innerHTML.toString();
+        if (num === '.') //special test for . only one allowed
+        {
+            if (!inputValid(bottomDisplay + num)) //if not valid return
+            {
+                return;
+            }
+        }
+        bottomDisplay += num;
     }
     displayBottom.innerHTML = bottomDisplay;
+}
+
+function inputValid(testInput) {
+    let numDecimal = 0;
+    //input is valid if it contains 1 .
+    for (const s of testInput) 
+    {
+        if (s === '.')
+        {
+            numDecimal++;
+        }
+    }
+    return (numDecimal <= 1);
 }
 
 function clearDisplay(e) {
@@ -54,15 +110,46 @@ function backSpace(e) {
 }
 
 //Solve equation
-function equalButton(e) {
+function equalButton() {
+    if (firstNumber === '') return; //fix undefined output when only 1 number is input
+    if (operation === '/' && bottomDisplay === '0') {
+        alert("Dividing by 0 is unsupported by the universe. Don't take it personally.");
+        bottomDisplay = '';
+        return;
+    }
     solution = operate(operation, firstNumber, bottomDisplay);
+    console.log(solution.toString().length);
+    if (solution.toString().length > maxCharacters)
+    {
+        roundSolution();
+    }
     updateTopDisplay(`${firstNumber} ${operation} ${bottomDisplay} = `);
     updateBottomDisplay(solution);
     operation = '';
 }
 
+function roundSolution()
+{
+    //if solution has a decimal
+    let decimal = (solution - Math.floor(solution));
+    if (decimal !== 0)
+    {
+        //count places after the decimal point
+        let decimalPlaces = decimal.toString().length;
+        //slotsTaken = number of places before and including the decimal point
+        let slotsTaken = solution.toString().length - (decimalPlaces - 2); //subtract 2 for 0 & .
+        //decimalPlacesAllowed = 10 - slotsTaken 
+        let decimalPlacesAllowed = maxCharacters - slotsTaken;
+        if (decimalPlacesAllowed < 0)
+        {
+            decimalPlacesAllowed = 0;
+        }
+        solution = solution.toFixed(decimalPlacesAllowed);
+    }
+}
+
 function updateTopDisplay(num) {
-    topDisplay = num; //`${firstNumber} ${operation}`;
+    topDisplay = num; 
     displayTop.innerHTML = topDisplay;
 }
 
@@ -71,36 +158,27 @@ function updateBottomDisplay(newText) {
     displayBottom.innerHTML = bottomDisplay;
 }
 
+//wrapper to allow key events to use calcOperation
 function operateButton(e) {
+    calcOperation(e.target.innerHTML.toString());
+}
+
+function calcOperation(operationSelected) {
     // if operation is not null, evaluate
     if (operation !== '')
     {
-        equalButton(e);
+        equalButton();
         firstNumber = bottomDisplay;
-        operation = e.target.innerHTML.toString();
+        operation = operationSelected;
     }
     else
     {
         firstNumber = bottomDisplay;
-        operation = e.target.innerHTML.toString();
+        operation = operationSelected;
         updateTopDisplay(`${firstNumber} ${operation}`);
     }
     isLastButtonOperator = true;
 }
-
-/*
-TODO:
-- Disable decimal if already one in display
-- Keyboard support
-- Round answers with long decimals so that they don’t overflow the screen.
-- Pressing = before entering all of the numbers or an operator could cause 
-    problems!
-- Pressing “clear” should wipe out any existing data.. 
-    make sure the user is really starting fresh after pressing “clear”
-- Display a snarky error message if the user tries to divide by 0… 
-    and don’t let it crash your calculator!
-- Readme
-*/
 
 function add(a, b) {
     return a + b;
@@ -124,11 +202,12 @@ function operate(operator, a, b) {
     switch (operator) {
         case '+': return add(a, b);
         case '-': return subtract(a, b);
-        case 'x': return multiply(a, b);
+        case 'x':
+        case '*': 
+            return multiply(a, b);
         case '/': return divide(a, b);
     }
 }
-
 
 /*
 TODO:
